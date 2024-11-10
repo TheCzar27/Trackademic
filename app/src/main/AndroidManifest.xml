@@ -12,6 +12,24 @@
         android:theme="@style/Theme.Trackademic"
         tools:targetApi="31">
         <activity
+            android:name=".BaseActivity"
+            android:exported="false" />
+        <activity
+            android:name=".HabitsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".GradesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".FinancesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TodoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ScheduleActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
