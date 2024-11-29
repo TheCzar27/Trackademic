@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder> {
-    private List<Expense> expenses;
+    private final List<Expense> expenses;
     private ExpenseCategory category;
     private Runnable updateCallback;
 
