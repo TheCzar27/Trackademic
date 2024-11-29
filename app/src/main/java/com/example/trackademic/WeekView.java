@@ -162,9 +162,9 @@ public class WeekView extends View {
     }
 
     public void addEvent(String name, int dayOfWeek, int startHour, int startMinute,
-                         int endHour, int endMinute) {
+                         int endHour, int endMinute, int colorIndex) {
         events.add(new ClassEvent(name, dayOfWeek, startHour, startMinute,
-                endHour, endMinute, events.size()));
+                endHour, endMinute, colorIndex % eventColors.length));
         invalidate();
     }
 

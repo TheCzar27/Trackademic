@@ -20,11 +20,43 @@
         android:inputType="text"
         android:layout_marginTop="8dp"/>
 
-    <Spinner
-        android:id="@+id/daySpinner"
+    <!-- Replace Spinner with CheckBoxes -->
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"/>
+        android:text="Select Days"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="4dp"/>
+
+    <CheckBox
+        android:id="@+id/mondayCheck"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Monday"/>
+
+    <CheckBox
+        android:id="@+id/tuesdayCheck"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tuesday"/>
+
+    <CheckBox
+        android:id="@+id/wednesdayCheck"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Wednesday"/>
+
+    <CheckBox
+        android:id="@+id/thursdayCheck"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Thursday"/>
+
+    <CheckBox
+        android:id="@+id/fridayCheck"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Friday"/>
 
     <LinearLayout
         android:layout_width="match_parent"

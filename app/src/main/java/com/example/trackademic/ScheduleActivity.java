@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -75,16 +76,16 @@ public class ScheduleActivity extends BaseActivity {
 
         EditText nameEdit = dialogView.findViewById(R.id.editClassName);
         EditText descriptionEdit = dialogView.findViewById(R.id.editDescription);
-        Spinner daySpinner = dialogView.findViewById(R.id.daySpinner);
         EditText startTimeEdit = dialogView.findViewById(R.id.startTimeEdit);
         EditText endTimeEdit = dialogView.findViewById(R.id.endTimeEdit);
         EditText professorEdit = dialogView.findViewById(R.id.editProfessor);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item,
-                new String[]{"Mon", "Tues", "Wed", "Thurs", "Fri"});
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        daySpinner.setAdapter(adapter);
+        // Get references to day checkboxes
+        CheckBox mondayCheck = dialogView.findViewById(R.id.mondayCheck);
+        CheckBox tuesdayCheck = dialogView.findViewById(R.id.tuesdayCheck);
+        CheckBox wednesdayCheck = dialogView.findViewById(R.id.wednesdayCheck);
+        CheckBox thursdayCheck = dialogView.findViewById(R.id.thursdayCheck);
+        CheckBox fridayCheck = dialogView.findViewById(R.id.fridayCheck);
 
         startTimeEdit.setOnClickListener(v -> showTimePickerDialog(startTimeEdit));
         endTimeEdit.setOnClickListener(v -> showTimePickerDialog(endTimeEdit));
@@ -94,14 +95,29 @@ public class ScheduleActivity extends BaseActivity {
                 .setPositiveButton("Add", (dialog, which) -> {
                     String name = nameEdit.getText().toString();
                     String description = descriptionEdit.getText().toString();
-                    String dayOfWeek = daySpinner.getSelectedItem().toString();
                     String startTime = startTimeEdit.getText().toString();
                     String endTime = endTimeEdit.getText().toString();
                     String professor = professorEdit.getText().toString();
 
                     if (!name.isEmpty() && !startTime.isEmpty() && !endTime.isEmpty()) {
-                        addClass(new ClassInfo(name, description, dayOfWeek,
-                                startTime, endTime, professor));
+                        // Collect all selected days
+                        List<String> selectedDays = new ArrayList<>();
+                        if (mondayCheck.isChecked()) selectedDays.add("Mon");
+                        if (tuesdayCheck.isChecked()) selectedDays.add("Tues");
+                        if (wednesdayCheck.isChecked()) selectedDays.add("Wed");
+                        if (thursdayCheck.isChecked()) selectedDays.add("Thurs");
+                        if (fridayCheck.isChecked()) selectedDays.add("Fri");
+
+                        if (!selectedDays.isEmpty()) {
+                            // Create one ClassInfo object with all days
+                            String daysString = String.join(", ", selectedDays);
+                            ClassInfo newClass = new ClassInfo(name, description, daysString,
+                                    startTime, endTime, professor);
+                            handleNewClass(newClass, selectedDays);
+                        } else {
+                            Toast.makeText(this, "Please select at least one day",
+                                    Toast.LENGTH_SHORT).show();
+                        }
                     } else {
                         Toast.makeText(this, "Please fill in all required fields",
                                 Toast.LENGTH_SHORT).show();
@@ -111,24 +127,33 @@ public class ScheduleActivity extends BaseActivity {
                 .show();
     }
 
-    private void addClass(ClassInfo newClass) {
+    private void handleNewClass(ClassInfo newClass, List<String> days) {
         if (classList == null) {
             classList = new ArrayList<>();
         }
         classList.add(newClass);
         saveClasses();
+
+        // Add single card view
         addClassView(newClass);
 
-        // Add to WeekView
+        // Get the color index for this class
+        int colorIndex = classList.size() - 1;
+
+        // Add to WeekView for each selected day
         int[] startTime = convertTimeString(newClass.getStartTime());
         int[] endTime = convertTimeString(newClass.getEndTime());
-        int dayColumn = getDayColumn(newClass.getDayOfWeek());
 
-        weekView.addEvent(newClass.getName(), dayColumn,
-                startTime[0], startTime[1],
-                endTime[0], endTime[1]);
+        // Add event for each day with the same color
+        for (String day : days) {
+            int dayColumn = getDayColumn(day);
+            weekView.addEvent(newClass.getName(), dayColumn,
+                    startTime[0], startTime[1],
+                    endTime[0], endTime[1],
+                    colorIndex); // Pass the same color index for all days
+        }
 
-        // Update next class info after adding new class
+        // Update next class info
         updateNextClassInfo();
     }
 
@@ -163,8 +188,11 @@ public class ScheduleActivity extends BaseActivity {
             descText.setVisibility(View.VISIBLE);
         }
 
-        String timeString = String.format("%s %s - %s", classItem.getDayOfWeek(),
-                classItem.getStartTime(), classItem.getEndTime());
+        // Format time string to show all days
+        String timeString = String.format("%s %s - %s",
+                classItem.getDayOfWeek(), // This now contains all days
+                classItem.getStartTime(),
+                classItem.getEndTime());
         timeText.setText(timeString);
         timeText.setVisibility(View.VISIBLE);
 
@@ -187,17 +215,30 @@ public class ScheduleActivity extends BaseActivity {
         builder.setTitle("Delete Class")
                 .setMessage("Are you sure you want to delete " + classItem.getName() + "?")
                 .setPositiveButton("Delete", (dialog, which) -> {
+                    // Remove from classList
                     classList.remove(classItem);
+                    // Remove card view
                     classContainer.removeView(cardView);
                     saveClasses();
+
+                    // Clear and rebuild week view
                     weekView.removeAllEvents();
+                    int colorIndex = 0; // Reset color index
                     for (ClassInfo cls : classList) {
+                        // Split days string back into individual days
+                        String[] days = cls.getDayOfWeek().split(", ");
                         int[] startTime = convertTimeString(cls.getStartTime());
                         int[] endTime = convertTimeString(cls.getEndTime());
-                        int dayColumn = getDayColumn(cls.getDayOfWeek());
-                        weekView.addEvent(cls.getName(), dayColumn,
-                                startTime[0], startTime[1],
-                                endTime[0], endTime[1]);
+
+                        // Add event for each day of this class
+                        for (String day : days) {
+                            int dayColumn = getDayColumn(day);
+                            weekView.addEvent(cls.getName(), dayColumn,
+                                    startTime[0], startTime[1],
+                                    endTime[0], endTime[1],
+                                    colorIndex);
+                        }
+                        colorIndex++; // Increment color index for next class
                     }
                     updateNextClassInfo();
                     Toast.makeText(this, "Class deleted", Toast.LENGTH_SHORT).show();
@@ -219,6 +260,7 @@ public class ScheduleActivity extends BaseActivity {
         ClassInfo nextClass = null;
         int daysUntilNext = 7; // Maximum days to look ahead
         String earliestTime = "11:59 PM";
+        String nextDay = null;  // Store the specific next day
 
         // Check today and next 6 days
         for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
@@ -228,30 +270,48 @@ public class ScheduleActivity extends BaseActivity {
             for (ClassInfo cls : classList) {
                 if (cls == null || cls.getDayOfWeek() == null || cls.getStartTime() == null) continue;
 
-                String classDay = normalizeDayName(cls.getDayOfWeek());
-                if (!classDay.equals(checkDayName)) continue;
+                // Split the days string and check each day
+                String[] classDays = cls.getDayOfWeek().split(", ");
+                for (String classDay : classDays) {
+                    String normalizedClassDay = normalizeDayName(classDay);
+                    if (!normalizedClassDay.equals(checkDayName)) continue;
 
-                // For same day, check if class hasn't started yet
-                if (dayOffset == 0) {
-                    if (compareTimeStrings(cls.getStartTime(), currentTime) <= 0) continue;
+                    // For same day, check if class hasn't started yet
+                    if (dayOffset == 0) {
+                        if (compareTimeStrings(cls.getStartTime(), currentTime) <= 0) continue;
 
-                    if (compareTimeStrings(cls.getStartTime(), earliestTime) < 0) {
+                        if (compareTimeStrings(cls.getStartTime(), earliestTime) < 0) {
+                            nextClass = cls;
+                            earliestTime = cls.getStartTime();
+                            daysUntilNext = 0;
+                            nextDay = classDay;  // Store the specific day
+                        }
+                    }
+                    // For future days, take the earliest class of that day
+                    else if (dayOffset < daysUntilNext) {
                         nextClass = cls;
                         earliestTime = cls.getStartTime();
-                        daysUntilNext = 0;
+                        daysUntilNext = dayOffset;
+                        nextDay = classDay;  // Store the specific day
+                        break;
                     }
                 }
-                // For future days, take the earliest class of that day
-                else if (dayOffset < daysUntilNext) {
-                    nextClass = cls;
-                    earliestTime = cls.getStartTime();
-                    daysUntilNext = dayOffset;
-                    break;
-                }
-            }
 
-            // If we found a class today, no need to check future days
-            if (daysUntilNext == 0) break;
+                // If we found a class today, no need to check future days
+                if (daysUntilNext == 0) break;
+            }
+        }
+
+        // Store the next day in the class info
+        if (nextClass != null) {
+            nextClass = new ClassInfo(
+                    nextClass.getName(),
+                    nextClass.getDescription(),
+                    nextDay,  // Use the specific next day instead of all days
+                    nextClass.getStartTime(),
+                    nextClass.getEndTime(),
+                    nextClass.getProfessor()
+            );
         }
 
         return nextClass;
@@ -266,7 +326,7 @@ public class ScheduleActivity extends BaseActivity {
             Calendar now = Calendar.getInstance();
             Calendar classDay = Calendar.getInstance();
             int currentDayOfWeek = now.get(Calendar.DAY_OF_WEEK);
-            int classDayOfWeek = getDayNumber(nextClass.getDayOfWeek());
+            int classDayOfWeek = getDayNumber(nextClass.getDayOfWeek());  // Now this will be the specific day
 
             // Calculate days until class
             int daysUntil = (classDayOfWeek - currentDayOfWeek + 7) % 7;
@@ -277,7 +337,7 @@ public class ScheduleActivity extends BaseActivity {
             } else if (daysUntil == 1) {
                 dayInfo = "Tomorrow";
             } else {
-                dayInfo = "on " + nextClass.getDayOfWeek();
+                dayInfo = "on " + nextClass.getDayOfWeek();  // Now shows specific day
             }
 
             String info = String.format("%s %s at %s with %s",
@@ -352,15 +412,22 @@ public class ScheduleActivity extends BaseActivity {
         if (classList == null) {
             classList = new ArrayList<>();
         } else {
-            for (ClassInfo classItem : classList) {
+            for (int colorIndex = 0; colorIndex < classList.size(); colorIndex++) {
+                ClassInfo classItem = classList.get(colorIndex);
                 if (classItem != null) {
                     addClassView(classItem);
                     int[] startTime = convertTimeString(classItem.getStartTime());
                     int[] endTime = convertTimeString(classItem.getEndTime());
-                    int dayColumn = getDayColumn(classItem.getDayOfWeek());
-                    weekView.addEvent(classItem.getName(), dayColumn,
-                            startTime[0], startTime[1],
-                            endTime[0], endTime[1]);
+
+                    // Split the days string and add events for each day
+                    String[] days = classItem.getDayOfWeek().split(", ");
+                    for (String day : days) {
+                        int dayColumn = getDayColumn(day);
+                        weekView.addEvent(classItem.getName(), dayColumn,
+                                startTime[0], startTime[1],
+                                endTime[0], endTime[1],
+                                colorIndex);
+                    }
                 }
             }
         }
