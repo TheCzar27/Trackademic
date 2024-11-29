@@ -1,118 +1,110 @@
 package com.example.trackademic;
 
 import android.app.AlertDialog;
-import android.content.Intent;
+import android.app.TimePickerDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
-
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
-public class ScheduleActivity extends AppCompatActivity {
-    private BottomNavigationView bottomNav;
+public class ScheduleActivity extends BaseActivity {
     private FloatingActionButton fabAdd;
     private LinearLayout classContainer;
-    private List<ClassInfo> classList; // Renamed to ClassInfo to avoid confusion with java.lang.Class
+    private WeekView weekView;
+    private List<ClassInfo> classList;
     private SharedPreferences prefs;
     private static final String CLASSES_KEY = "saved_classes";
-
-    // Inner class for storing class information
-    private static class ClassInfo {
-        private String name;
-        private String description;
-        private String time;
-        private String professor;
-
-        public ClassInfo(String name, String description, String time, String professor) {
-            this.name = name;
-            this.description = description;
-            this.time = time;
-            this.professor = professor;
-        }
-
-        public String getName() { return name; }
-        public String getDescription() { return description; }
-        public String getTime() { return time; }
-        public String getProfessor() { return professor; }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_schedule);
+
+        // Inflate schedule content into base layout
+        FrameLayout contentContainer = findViewById(R.id.contentContainer);
+        View scheduleContent = LayoutInflater.from(this).inflate(R.layout.activity_schedule, contentContainer, false);
+        contentContainer.addView(scheduleContent);
 
         // Initialize views
-        bottomNav = findViewById(R.id.bottomNav);
         fabAdd = findViewById(R.id.fabAdd);
         classContainer = findViewById(R.id.classContainer);
+        weekView = findViewById(R.id.weekView);
 
-        // Set student name from SharedPreferences
-        TextView studentName = findViewById(R.id.studentName);
+        // Get SharedPreferences
         prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
-        String username = prefs.getString("username", "Student Name");
-        studentName.setText(username);
-
-        // Load saved classes
-        loadClasses();
-
-        // Setup bottom navigation
-        bottomNav.setOnNavigationItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-            if (itemId == R.id.nav_schedule) {
-                return true;
-            } else if (itemId == R.id.nav_todo) {
-                startActivity(new Intent(this, TodoActivity.class));
-                return true;
-            } else if (itemId == R.id.nav_finances) {
-                startActivity(new Intent(this, FinancesActivity.class));
-                return true;
-            } else if (itemId == R.id.nav_grades) {
-                startActivity(new Intent(this, GradesActivity.class));
-                return true;
-            } else if (itemId == R.id.nav_habits) {
-                startActivity(new Intent(this, HabitsActivity.class));
-                return true;
-            }
-            return false;
-        });
 
         // Setup FAB
         fabAdd.setOnClickListener(v -> showAddClassDialog());
+
+        // Load classes
+        loadClasses();
+        updateNextClassInfo();
+    }
+
+    private void showTimePickerDialog(final EditText timeEdit) {
+        Calendar calendar = Calendar.getInstance();
+        TimePickerDialog timePickerDialog = new TimePickerDialog(this,
+                (view, hourOfDay, minute) -> {
+                    String amPm = hourOfDay >= 12 ? "PM" : "AM";
+                    int hour12 = hourOfDay > 12 ? hourOfDay - 12 : (hourOfDay == 0 ? 12 : hourOfDay);
+                    timeEdit.setText(String.format(Locale.getDefault(), "%d:%02d %s",
+                            hour12, minute, amPm));
+                }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false);
+        timePickerDialog.show();
     }
 
     private void showAddClassDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View dialogView = LayoutInflater.from(this).inflate(R.layout.activity_add_class_dialog, null);
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_class, null);
 
         EditText nameEdit = dialogView.findViewById(R.id.editClassName);
         EditText descriptionEdit = dialogView.findViewById(R.id.editDescription);
-        EditText timeEdit = dialogView.findViewById(R.id.editTime);
+        Spinner daySpinner = dialogView.findViewById(R.id.daySpinner);
+        EditText startTimeEdit = dialogView.findViewById(R.id.startTimeEdit);
+        EditText endTimeEdit = dialogView.findViewById(R.id.endTimeEdit);
         EditText professorEdit = dialogView.findViewById(R.id.editProfessor);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item,
+                new String[]{"Mon", "Tues", "Wed", "Thurs", "Fri"});
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        daySpinner.setAdapter(adapter);
+
+        startTimeEdit.setOnClickListener(v -> showTimePickerDialog(startTimeEdit));
+        endTimeEdit.setOnClickListener(v -> showTimePickerDialog(endTimeEdit));
 
         builder.setView(dialogView)
                 .setTitle("Add New Class")
                 .setPositiveButton("Add", (dialog, which) -> {
                     String name = nameEdit.getText().toString();
                     String description = descriptionEdit.getText().toString();
-                    String time = timeEdit.getText().toString();
+                    String dayOfWeek = daySpinner.getSelectedItem().toString();
+                    String startTime = startTimeEdit.getText().toString();
+                    String endTime = endTimeEdit.getText().toString();
                     String professor = professorEdit.getText().toString();
 
-                    if (!name.isEmpty()) {
-                        addClass(new ClassInfo(name, description, time, professor));
+                    if (!name.isEmpty() && !startTime.isEmpty() && !endTime.isEmpty()) {
+                        addClass(new ClassInfo(name, description, dayOfWeek,
+                                startTime, endTime, professor));
+                    } else {
+                        Toast.makeText(this, "Please fill in all required fields",
+                                Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -120,19 +112,49 @@ public class ScheduleActivity extends AppCompatActivity {
     }
 
     private void addClass(ClassInfo newClass) {
+        if (classList == null) {
+            classList = new ArrayList<>();
+        }
         classList.add(newClass);
         saveClasses();
         addClassView(newClass);
+
+        // Add to WeekView
+        int[] startTime = convertTimeString(newClass.getStartTime());
+        int[] endTime = convertTimeString(newClass.getEndTime());
+        int dayColumn = getDayColumn(newClass.getDayOfWeek());
+
+        weekView.addEvent(newClass.getName(), dayColumn,
+                startTime[0], startTime[1],
+                endTime[0], endTime[1]);
+
+        // Update next class info after adding new class
+        updateNextClassInfo();
+    }
+
+    private int[] convertTimeString(String timeString) {
+        String[] parts = timeString.split(" ");
+        String[] timeParts = parts[0].split(":");
+        int hour = Integer.parseInt(timeParts[0]);
+        int minute = Integer.parseInt(timeParts[1]);
+
+        if (parts[1].equals("PM") && hour != 12) {
+            hour += 12;
+        } else if (parts[1].equals("AM") && hour == 12) {
+            hour = 0;
+        }
+
+        return new int[]{hour, minute};
     }
 
     private void addClassView(ClassInfo classItem) {
-        View cardView = LayoutInflater.from(this).inflate(R.layout.class_card_layout, classContainer, false);
+        View cardView = LayoutInflater.from(this).inflate(R.layout.class_card_layout,
+                classContainer, false);
 
         TextView nameText = cardView.findViewById(R.id.className);
         TextView descText = cardView.findViewById(R.id.classDescription);
         TextView timeText = cardView.findViewById(R.id.classTime);
         TextView profText = cardView.findViewById(R.id.classProfessor);
-        View deleteBtn = cardView.findViewById(R.id.deleteButton);
 
         nameText.setText(classItem.getName());
 
@@ -141,23 +163,184 @@ public class ScheduleActivity extends AppCompatActivity {
             descText.setVisibility(View.VISIBLE);
         }
 
-        if (!classItem.getTime().isEmpty()) {
-            timeText.setText("Time: " + classItem.getTime());
-            timeText.setVisibility(View.VISIBLE);
-        }
+        String timeString = String.format("%s %s - %s", classItem.getDayOfWeek(),
+                classItem.getStartTime(), classItem.getEndTime());
+        timeText.setText(timeString);
+        timeText.setVisibility(View.VISIBLE);
 
         if (!classItem.getProfessor().isEmpty()) {
             profText.setText("Professor: " + classItem.getProfessor());
             profText.setVisibility(View.VISIBLE);
         }
 
-        deleteBtn.setOnClickListener(v -> {
-            classList.remove(classItem);
-            classContainer.removeView(cardView);
-            saveClasses();
+        // Add long press listener
+        cardView.setOnLongClickListener(v -> {
+            showDeleteDialog(classItem, cardView);
+            return true;
         });
 
         classContainer.addView(cardView);
+    }
+
+    private void showDeleteDialog(ClassInfo classItem, View cardView) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Delete Class")
+                .setMessage("Are you sure you want to delete " + classItem.getName() + "?")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    classList.remove(classItem);
+                    classContainer.removeView(cardView);
+                    saveClasses();
+                    weekView.removeAllEvents();
+                    for (ClassInfo cls : classList) {
+                        int[] startTime = convertTimeString(cls.getStartTime());
+                        int[] endTime = convertTimeString(cls.getEndTime());
+                        int dayColumn = getDayColumn(cls.getDayOfWeek());
+                        weekView.addEvent(cls.getName(), dayColumn,
+                                startTime[0], startTime[1],
+                                endTime[0], endTime[1]);
+                    }
+                    updateNextClassInfo();
+                    Toast.makeText(this, "Class deleted", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private ClassInfo findNextClass() {
+        if (classList == null || classList.isEmpty()) return null;
+
+        Calendar now = Calendar.getInstance();
+        int currentDayOfWeek = now.get(Calendar.DAY_OF_WEEK);
+        String currentTime = String.format(Locale.getDefault(), "%d:%02d %s",
+                now.get(Calendar.HOUR) == 0 ? 12 : now.get(Calendar.HOUR),
+                now.get(Calendar.MINUTE),
+                now.get(Calendar.AM_PM) == Calendar.AM ? "AM" : "PM");
+
+        ClassInfo nextClass = null;
+        int daysUntilNext = 7; // Maximum days to look ahead
+        String earliestTime = "11:59 PM";
+
+        // Check today and next 6 days
+        for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
+            int checkDay = ((currentDayOfWeek - 1 + dayOffset) % 7) + 1;
+            String checkDayName = getDayOfWeekName(checkDay);
+
+            for (ClassInfo cls : classList) {
+                if (cls == null || cls.getDayOfWeek() == null || cls.getStartTime() == null) continue;
+
+                String classDay = normalizeDayName(cls.getDayOfWeek());
+                if (!classDay.equals(checkDayName)) continue;
+
+                // For same day, check if class hasn't started yet
+                if (dayOffset == 0) {
+                    if (compareTimeStrings(cls.getStartTime(), currentTime) <= 0) continue;
+
+                    if (compareTimeStrings(cls.getStartTime(), earliestTime) < 0) {
+                        nextClass = cls;
+                        earliestTime = cls.getStartTime();
+                        daysUntilNext = 0;
+                    }
+                }
+                // For future days, take the earliest class of that day
+                else if (dayOffset < daysUntilNext) {
+                    nextClass = cls;
+                    earliestTime = cls.getStartTime();
+                    daysUntilNext = dayOffset;
+                    break;
+                }
+            }
+
+            // If we found a class today, no need to check future days
+            if (daysUntilNext == 0) break;
+        }
+
+        return nextClass;
+    }
+
+    private void updateNextClassInfo() {
+        TextView nextClassInfo = findViewById(R.id.nextClassInfo);
+        if (nextClassInfo == null) return;
+
+        ClassInfo nextClass = findNextClass();
+        if (nextClass != null) {
+            Calendar now = Calendar.getInstance();
+            Calendar classDay = Calendar.getInstance();
+            int currentDayOfWeek = now.get(Calendar.DAY_OF_WEEK);
+            int classDayOfWeek = getDayNumber(nextClass.getDayOfWeek());
+
+            // Calculate days until class
+            int daysUntil = (classDayOfWeek - currentDayOfWeek + 7) % 7;
+            String dayInfo;
+
+            if (daysUntil == 0) {
+                dayInfo = "Today";
+            } else if (daysUntil == 1) {
+                dayInfo = "Tomorrow";
+            } else {
+                dayInfo = "on " + nextClass.getDayOfWeek();
+            }
+
+            String info = String.format("%s %s at %s with %s",
+                    nextClass.getName(),
+                    dayInfo,
+                    nextClass.getStartTime(),
+                    nextClass.getProfessor());
+            nextClassInfo.setText(info);
+        } else {
+            nextClassInfo.setText("No upcoming classes scheduled");
+        }
+    }
+
+    private int getDayNumber(String day) {
+        day = day.toLowerCase();
+        if (day.startsWith("mon")) return Calendar.MONDAY;
+        if (day.startsWith("tue")) return Calendar.TUESDAY;
+        if (day.startsWith("wed")) return Calendar.WEDNESDAY;
+        if (day.startsWith("thu")) return Calendar.THURSDAY;
+        if (day.startsWith("fri")) return Calendar.FRIDAY;
+        return Calendar.SUNDAY; // Default, though shouldn't occur
+    }
+
+    private int getDayColumn(String day) {
+        day = day.toLowerCase();
+        if (day.startsWith("mon")) return 1;
+        if (day.startsWith("tue")) return 2;
+        if (day.startsWith("wed")) return 3;
+        if (day.startsWith("thu")) return 4;
+        if (day.startsWith("fri")) return 5;
+        return 0;
+    }
+
+    private String getDayOfWeekName(int day) {
+        switch (day) {
+            case Calendar.MONDAY: return "Monday";
+            case Calendar.TUESDAY: return "Tuesday";
+            case Calendar.WEDNESDAY: return "Wednesday";
+            case Calendar.THURSDAY: return "Thursday";
+            case Calendar.FRIDAY: return "Friday";
+            default: return "";
+        }
+    }
+
+    private String normalizeDayName(String day) {
+        day = day.toLowerCase();
+        if (day.startsWith("mon")) return "Monday";
+        if (day.startsWith("tue")) return "Tuesday";
+        if (day.startsWith("wed")) return "Wednesday";
+        if (day.startsWith("thu")) return "Thursday";
+        if (day.startsWith("fri")) return "Friday";
+        return day;
+    }
+
+    private int compareTimeStrings(String time1, String time2) {
+        try {
+            int[] t1 = convertTimeString(time1);
+            int[] t2 = convertTimeString(time2);
+            return (t1[0] * 60 + t1[1]) - (t2[0] * 60 + t2[1]);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     private void loadClasses() {
@@ -170,14 +353,31 @@ public class ScheduleActivity extends AppCompatActivity {
             classList = new ArrayList<>();
         } else {
             for (ClassInfo classItem : classList) {
-                addClassView(classItem);
+                if (classItem != null) {
+                    addClassView(classItem);
+                    int[] startTime = convertTimeString(classItem.getStartTime());
+                    int[] endTime = convertTimeString(classItem.getEndTime());
+                    int dayColumn = getDayColumn(classItem.getDayOfWeek());
+                    weekView.addEvent(classItem.getName(), dayColumn,
+                            startTime[0], startTime[1],
+                            endTime[0], endTime[1]);
+                }
             }
         }
     }
 
     private void saveClasses() {
-        Gson gson = new Gson();
-        String json = gson.toJson(classList);
-        prefs.edit().putString(CLASSES_KEY, json).apply();
+        if (prefs != null && classList != null) {
+            Gson gson = new Gson();
+            String json = gson.toJson(classList);
+            prefs.edit().putString(CLASSES_KEY, json).apply();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Update next class info when returning to the activity
+        updateNextClassInfo();
     }
 }
