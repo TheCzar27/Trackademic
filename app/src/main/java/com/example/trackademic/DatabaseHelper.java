@@ -13,9 +13,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Table Names
     private static final String TABLE_USERS = "users";
     private static final String TABLE_PROFILES = "profiles";
+    private static final String TABLE_CLASSES = "classes";
 
     // Common column names
     private static final String COLUMN_ID = "id";
+    private static final String COLUMN_COURSE_ID = "course_id";
 
     // Users Table Columns
     private static final String COLUMN_USERNAME = "username";
@@ -27,6 +29,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_EMAIL = "email";
     private static final String COLUMN_MAJOR = "major";
     private static final String COLUMN_GRADUATION_YEAR = "graduation_year";
+
+    // Classes Table Columns
+    private static final String COLUMN_NAME = "name";
+    private static final String COLUMN_DESCRIPTION = "description";
+    private static final String COLUMN_DAY_OF_WEEK = "day_of_week";
+    private static final String COLUMN_START_TIME = "start_time";
+    private static final String COLUMN_END_TIME = "end_time";
+    private static final String COLUMN_PROFESSOR = "professor";
 
     // Create Users Table
     private static final String CREATE_TABLE_USERS = "CREATE TABLE " + TABLE_USERS + "("
@@ -46,6 +56,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + "FOREIGN KEY(" + COLUMN_USER_ID + ") REFERENCES " + TABLE_USERS + "(" + COLUMN_ID + ")"
             + ")";
 
+    // Create Classes Table
+    private static final String CREATE_TABLE_CLASSES = "CREATE TABLE " + TABLE_CLASSES + "("
+            + COLUMN_COURSE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            + COLUMN_NAME + " TEXT ,"
+            + COLUMN_DESCRIPTION + " TEXT ,"
+            + COLUMN_DAY_OF_WEEK + " TEXT ,"
+            + COLUMN_START_TIME + " TEXT ,"
+            + COLUMN_END_TIME + " TEXT ,"
+            + COLUMN_PROFESSOR + " TEXT"
+            + ")";
+
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -55,6 +76,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Creating required tables
         db.execSQL(CREATE_TABLE_USERS);
         db.execSQL(CREATE_TABLE_PROFILES);
+        db.execSQL(CREATE_TABLE_CLASSES);
     }
 
     @Override
@@ -62,10 +84,58 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Drop older tables if existed
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROFILES);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
+        db.execSQL("DROP TABLE IF EXISTS " + CREATE_TABLE_CLASSES);
 
         // Create tables again
         onCreate(db);
     }
+
+    // Class Table management methods
+    public void addNewClass(ClassInfo newClass){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NAME, newClass.getName());
+        values.put(COLUMN_DESCRIPTION, newClass.getDescription());
+        values.put(COLUMN_DAY_OF_WEEK, newClass.getDayOfWeek());
+        values.put(COLUMN_START_TIME, newClass.getStartTime());
+        values.put(COLUMN_END_TIME, newClass.getEndTime());
+        values.put(COLUMN_PROFESSOR, newClass.getProfessor());
+
+        // Insert new class into table
+        db.insert(TABLE_CLASSES, null, values);
+    }
+
+    public void deleteClass(ClassInfo deleteClass){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DELETE FROM " + TABLE_CLASSES + " WHERE " + COLUMN_NAME + " = '" +
+                deleteClass.getName() +"'");
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // User Management Methods
     public long addUser(String username, String password) {

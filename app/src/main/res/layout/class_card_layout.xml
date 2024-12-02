@@ -12,35 +12,56 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingBottom="16dp">
 
-        <TextView
-            android:id="@+id/className"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:textStyle="bold"/>
+            android:orientation="vertical"
+            android:paddingVertical="10dp"
+            android:background="@color/gold">
+            <TextView
+                android:id="@+id/className"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:text="CSI 4230"
+                android:textStyle="bold"
+                android:textColor="@color/white"
 
-        <TextView
-            android:id="@+id/classDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:visibility="gone"/>
+                android:textAlignment="center"
+                />
+
+            <TextView
+                android:id="@+id/classDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Mobile App Development"
+                android:textStyle="bold"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:visibility="gone"
+                />
+        </LinearLayout>
+
 
         <TextView
             android:id="@+id/classTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:visibility="gone"/>
+            android:layout_marginTop="10dp"
+            android:text="Mon, Wd 5:30 PM - 7:17 PM"
+            android:textAlignment="center"
+            />
 
         <TextView
             android:id="@+id/classProfessor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:visibility="gone"/>
+            android:text="Professor: Jawad"
+            android:textAlignment="center"
+            />
 
     </LinearLayout>
 

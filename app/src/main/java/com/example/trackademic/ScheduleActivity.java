@@ -32,10 +32,13 @@ public class ScheduleActivity extends BaseActivity {
     private List<ClassInfo> classList;
     private SharedPreferences prefs;
     private static final String CLASSES_KEY = "saved_classes";
+    private DatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        databaseHelper = new DatabaseHelper(this);
 
         // Inflate schedule content into base layout
         FrameLayout contentContainer = findViewById(R.id.contentContainer);
@@ -134,6 +137,8 @@ public class ScheduleActivity extends BaseActivity {
         classList.add(newClass);
         saveClasses();
 
+        //save class to Database
+        databaseHelper.addNewClass(newClass);
         // Add single card view
         addClassView(newClass);
 
@@ -217,6 +222,10 @@ public class ScheduleActivity extends BaseActivity {
                 .setPositiveButton("Delete", (dialog, which) -> {
                     // Remove from classList
                     classList.remove(classItem);
+
+                    //Delete from database
+                    databaseHelper.deleteClass(classItem);
+
                     // Remove card view
                     classContainer.removeView(cardView);
                     saveClasses();
@@ -434,6 +443,7 @@ public class ScheduleActivity extends BaseActivity {
     }
 
     private void saveClasses() {
+
         if (prefs != null && classList != null) {
             Gson gson = new Gson();
             String json = gson.toJson(classList);

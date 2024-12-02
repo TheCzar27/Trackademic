@@ -1,10 +1,295 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".GradesActivity">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.cardview.widget.CardView
+        android:layout_width="360dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        app:cardElevation="4dp"
+        app:cardCornerRadius="8dp"
+
+        >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"></LinearLayout>
+
+
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:paddingTop="15dp"
+                >
+                <TableRow
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp">
+                    <TextView
+                        android:id="@+id/className"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="CSI 4230"
+                        android:textColor="@color/gold"
+                        android:textStyle="bold"
+                        android:textSize="25dp"
+                        android:layout_gravity="center_vertical"
+                        />
+                    <TextView
+                        android:id="@+id/overallGrade"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0%"
+                        android:textColor="@color/gold"
+                        android:textStyle="bold"
+                        android:textSize="35dp"
+                        android:layout_gravity="right"
+                        android:layout_span="2"
+                        android:paddingRight="5dp"
+                        />
+
+
+                </TableRow>
+                <TableRow
+
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp"
+                    android:paddingBottom="10dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Desired Grade"
+                        android:textSize="18dp"
+                        android:layout_span="2"/>
+
+
+                    <EditText
+                        android:id="@+id/desiredGrade"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="3"
+                        android:textAlignment="center"
+                        android:inputType="numberDecimal"
+                        android:textSize="20dp"
+                        android:imeOptions="actionDone"/>
+
+                </TableRow>
+                <TableRow
+                    android:background="@color/gold"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Category"
+                        android:textSize="15dp"
+                        android:textColor="@color/white"
+                        android:paddingHorizontal="5dp"
+                        android:layout_marginRight="10dp"
+                        android:paddingVertical="7dp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Weight (%)"
+                        android:paddingHorizontal="7dp"
+                        android:textSize="15dp"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="7dp"
+                        android:text="Grade (%)"
+                        android:textSize="15dp"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"/>
+                </TableRow>
+                <TableRow
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp">
+                    <EditText
+                        android:id="@+id/cat1Name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="9"
+                        android:inputType="text"
+                        android:textSize="16dp"
+                        android:hint="e.g. Homework"
+                        />
+                    <EditText
+                        android:id="@+id/cat1Weight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="2"
+                        android:textAlignment="center"
+                        android:inputType="numberDecimal"
+                        android:textSize="16dp"/>
+                    <EditText
+                        android:id="@+id/cat1Grade"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="2"
+                        android:textAlignment="center"
+                        android:inputType="numberDecimal"
+                        android:textSize="16dp"/>
+
+                </TableRow>
+                <TableRow
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp">
+                    <EditText
+                        android:id="@+id/cat2Name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="8"
+                        android:inputType="text"
+                        android:textSize="16dp"
+                        android:hint="e.g. Quiz"
+                        />
+                    <EditText
+                        android:id="@+id/cat2Weight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="2"
+                        android:textAlignment="center"
+                        android:inputType="numberDecimal"
+                        android:textSize="16dp"/>
+                    <EditText
+                        android:id="@+id/cat2Grade"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="2"
+                        android:textAlignment="center"
+                        android:inputType="numberDecimal"
+                        android:textSize="16dp"/>
+                </TableRow>
+                <TableRow
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp">
+                    <EditText
+                        android:id="@+id/cat3Name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="8"
+                        android:inputType="text"
+                        android:textSize="16dp"
+                        android:hint="e.g. Test"
+                        />
+                    <EditText
+                        android:id="@+id/cat3Weight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="2"
+                        android:textAlignment="center"
+                        android:inputType="numberDecimal"
+                        android:textSize="16dp"/>
+                    <EditText
+                        android:id="@+id/cat3Grade"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="2"
+                        android:textAlignment="center"
+                        android:inputType="numberDecimal"
+                        android:textSize="16dp"/>
+                </TableRow>
+                <TableRow
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp">
+                    <EditText
+                        android:id="@+id/cat4Name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="8"
+                        android:inputType="text"
+                        android:textSize="16dp"
+                        android:hint="e.g. Project"
+                        />
+                    <EditText
+                        android:id="@+id/cat4Weight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="2"
+                        android:textAlignment="center"
+                        android:inputType="numberDecimal"
+                        android:textSize="16dp"/>
+                    <EditText
+                        android:id="@+id/cat4Grade"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="2"
+                        android:textAlignment="center"
+                        android:inputType="numberDecimal"
+                        android:textSize="16dp"/>
+                </TableRow>
+
+                <TableRow
+                    android:paddingTop="10dp"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp"
+                    android:paddingBottom="15dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Final Exam (Needed)"
+                        android:inputType="text"
+                        android:textSize="16dp"
+                        android:textStyle="bold"
+                        android:textColor="#000000"
+                        />
+                    <EditText
+                        android:id="@+id/finalExamWeight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="2"
+                        android:textAlignment="center"
+                        android:inputType="numberDecimal"
+                        android:textSize="16dp"
+                        android:textColor="#000000"/>
+                    <TextView
+                        android:id="@+id/finalExamGrade"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0%"
+                        android:textStyle="bold"
+                        android:textAlignment="center"
+                        android:inputType="numberDecimal"
+                        android:textSize="20dp"
+                        android:textColor="#000000"/>
+                </TableRow>
+
+            </TableLayout>
+            <Button
+                android:id="@+id/calcBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CALCULATE"
+                android:layout_gravity="center"
+                android:layout_marginBottom="15dp"/>
+
+
+
+
+
+
+        </LinearLayout>
+
+
+
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>
