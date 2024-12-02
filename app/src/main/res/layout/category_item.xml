@@ -12,39 +12,52 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingBottom="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
+            android:paddingVertical="10dp"
+            android:background="@color/gold">
 
             <TextView
                 android:id="@+id/categoryName"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textSize="18sp"/>
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:textAlignment="textStart"
+                android:layout_marginStart="16dp"/>
 
             <TextView
                 android:id="@+id/categoryTotal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="18sp"/>
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:textAlignment="textEnd"
+                android:layout_marginEnd="16dp"
+                />
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/expensesRecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"/>
 
         <Button
             android:id="@+id/addExpenseButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Add Expense"
-            android:backgroundTint="#8B7355"
-            android:layout_gravity="end"/>
+            android:backgroundTint="#BFA98F"
+            android:layout_gravity="end"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"/>
     </LinearLayout>
 </androidx.cardview.widget.CardView>
