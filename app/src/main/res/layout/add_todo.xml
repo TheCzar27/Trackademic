@@ -49,6 +49,6 @@
         android:layout_height="wrap_content"
         android:text="Add To-Do"
         android:layout_gravity="center"
-        android:backgroundTint="@color/design_default_color_primary"
+        android:background="@color/gold"
         android:textColor="@android:color/white" />
 </LinearLayout>

@@ -1,20 +1,18 @@
 package com.example.trackademic;
 
 import android.app.AlertDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
-
 import java.util.ArrayList;
 
-public class HabitsActivity extends AppCompatActivity {
-
+public class HabitsActivity extends BaseActivity {
     private LinearLayout habitList;
     private TextView tvNoHabits;
     private ArrayList<Habit> habits;
@@ -22,8 +20,7 @@ public class HabitsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_habits);
-
+        getLayoutInflater().inflate(R.layout.activity_habits, (ViewGroup) findViewById(R.id.contentContainer));
 
         habitList = findViewById(R.id.habitList);
         tvNoHabits = new TextView(this);
@@ -31,23 +28,44 @@ public class HabitsActivity extends AppCompatActivity {
         tvNoHabits.setTextSize(18);
         tvNoHabits.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
 
-        habits = new ArrayList<>();
+        habits = loadHabits();
         Button btnAddHabit = findViewById(R.id.btnAddHabit);
+        btnAddHabit.setOnClickListener(v -> showAddHabitDialog());
 
-
-        btnAddHabit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showAddHabitDialog();
-            }
-        });
-
+        for (Habit habit : habits) {
+            habitList.addView(createHabitView(habit));
+        }
         updateHabitListVisibility();
     }
 
+    private ArrayList<Habit> loadHabits() {
+        ArrayList<Habit> loadedHabits = new ArrayList<>();
+        SharedPreferences prefs = getSharedPreferences("HabitsPrefs", MODE_PRIVATE);
+        int habitCount = prefs.getInt("habitCount", 0);
+
+        for (int i = 0; i < habitCount; i++) {
+            String name = prefs.getString("habit_name_" + i, "");
+            long creationDate = prefs.getLong("habit_creation_" + i, 0);
+            loadedHabits.add(new Habit(name, creationDate));
+        }
+        return loadedHabits;
+    }
+
+    private void saveHabits() {
+        SharedPreferences prefs = getSharedPreferences("HabitsPrefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.clear();
+        editor.putInt("habitCount", habits.size());
+
+        for (int i = 0; i < habits.size(); i++) {
+            Habit habit = habits.get(i);
+            editor.putString("habit_name_" + i, habit.getName());
+            editor.putLong("habit_creation_" + i, habit.creationDate);
+        }
+        editor.apply();
+    }
 
     private void showAddHabitDialog() {
-
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View dialogView = LayoutInflater.from(this).inflate(R.layout.create_habit, null);
         builder.setView(dialogView);
@@ -57,42 +75,27 @@ public class HabitsActivity extends AppCompatActivity {
 
         AlertDialog dialog = builder.create();
 
-        btnSaveHabit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String habitName = etHabitName.getText().toString().trim();
-                if (habitName.isEmpty()) {
-                    Toast.makeText(HabitsActivity.this, "Please enter a habit name", Toast.LENGTH_SHORT).show();
-                } else {
-                    addHabit(habitName);
-                    dialog.dismiss();
-                }
+        btnSaveHabit.setOnClickListener(v -> {
+            String habitName = etHabitName.getText().toString().trim();
+            if (habitName.isEmpty()) {
+                Toast.makeText(HabitsActivity.this, "Please enter a habit name", Toast.LENGTH_SHORT).show();
+            } else {
+                addHabit(habitName);
+                dialog.dismiss();
             }
         });
 
         dialog.show();
     }
 
-    /**
-     *
-     * @param habitName The name of the habit.
-     */
     private void addHabit(String habitName) {
-        Habit habit = new Habit(habitName, 0);
+        Habit habit = new Habit(habitName, System.currentTimeMillis());
         habits.add(habit);
-
-        // Add the habit to the UI
-        View habitItem = createHabitView(habit);
-        habitList.addView(habitItem);
-
+        habitList.addView(createHabitView(habit));
         updateHabitListVisibility();
+        saveHabits();
     }
 
-    /**
-     *
-     * @param habit The habit object.
-     * @return The view representing the habit.
-     */
     private View createHabitView(Habit habit) {
         View habitView = LayoutInflater.from(this).inflate(R.layout.habit_item, null);
 
@@ -103,37 +106,23 @@ public class HabitsActivity extends AppCompatActivity {
         tvHabitName.setText(habit.getName());
         tvHabitDays.setText(habit.getDays() + " Days");
 
+        habitView.setOnClickListener(v -> showViewHabitDialog(habit));
 
-        habitView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showViewHabitDialog(habit);
-            }
-        });
-
-
-        btnDeleteHabit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                habits.remove(habit);
-                habitList.removeView(habitView);
-                updateHabitListVisibility();
-                Toast.makeText(HabitsActivity.this, habit.getName() + " deleted", Toast.LENGTH_SHORT).show();
-            }
+        btnDeleteHabit.setOnClickListener(v -> {
+            habits.remove(habit);
+            habitList.removeView(habitView);
+            updateHabitListVisibility();
+            saveHabits();
+            Toast.makeText(HabitsActivity.this, habit.getName() + " deleted", Toast.LENGTH_SHORT).show();
         });
 
         return habitView;
     }
 
-    /**
-     *
-     * @param habit The habit to view/edit.
-     */
     private void showViewHabitDialog(Habit habit) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View dialogView = LayoutInflater.from(this).inflate(R.layout.habit_card, null);
         builder.setView(dialogView);
-
 
         TextView tvHabitTitle = dialogView.findViewById(R.id.tvHabitTitle);
         TextView tvHabitDays = dialogView.findViewById(R.id.tvHabitDays);
@@ -144,17 +133,13 @@ public class HabitsActivity extends AppCompatActivity {
 
         AlertDialog dialog = builder.create();
 
-        btnEditHabit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(HabitsActivity.this, "Edit functionality not implemented yet", Toast.LENGTH_SHORT).show();
-                dialog.dismiss();
-            }
+        btnEditHabit.setOnClickListener(v -> {
+            Toast.makeText(HabitsActivity.this, "Edit functionality not implemented yet", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
         });
 
         dialog.show();
     }
-
 
     private void updateHabitListVisibility() {
         if (habits.isEmpty()) {
@@ -165,14 +150,13 @@ public class HabitsActivity extends AppCompatActivity {
         }
     }
 
-
     private static class Habit {
-        private String name;
-        private int days;
+        private final String name;
+        private final long creationDate;
 
-        public Habit(String name, int days) {
+        public Habit(String name, long creationDate) {
             this.name = name;
-            this.days = days;
+            this.creationDate = creationDate;
         }
 
         public String getName() {
@@ -180,7 +164,7 @@ public class HabitsActivity extends AppCompatActivity {
         }
 
         public int getDays() {
-            return days;
+            return (int) ((System.currentTimeMillis() - creationDate) / (1000 * 60 * 60 * 24));
         }
     }
 }

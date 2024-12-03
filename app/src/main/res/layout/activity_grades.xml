@@ -42,7 +42,7 @@
                         android:id="@+id/className"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="CSI 4230"
+                        android:text="Grade Calc"
                         android:textColor="@color/gold"
                         android:textStyle="bold"
                         android:textSize="25dp"

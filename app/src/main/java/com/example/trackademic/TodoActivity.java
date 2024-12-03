@@ -1,24 +1,23 @@
 package com.example.trackademic;
 
 import android.app.AlertDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
-public class TodoActivity extends AppCompatActivity {
-
+public class TodoActivity extends BaseActivity {
     private LinearLayout todoList;
     private TextView tvNoItems;
     private ArrayList<ToDoItem> todos;
@@ -26,31 +25,58 @@ public class TodoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_todo);
+        getLayoutInflater().inflate(R.layout.activity_todo, (ViewGroup) findViewById(R.id.contentContainer));
 
-        // Initialize views
         todoList = findViewById(R.id.todoList);
-        todos = new ArrayList<>();
+        todos = loadTodos();
         tvNoItems = new TextView(this);
         tvNoItems.setText("No items to-do");
         tvNoItems.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         tvNoItems.setTextSize(18);
 
-        // Floating button for adding To-Do items
         Button btnAddTodo = findViewById(R.id.btnAddTodo);
         btnAddTodo.setOnClickListener(v -> showAddTodoPopup());
 
+        for (ToDoItem todo : todos) {
+            todoList.addView(createTodoItemView(todo));
+        }
         updateTodoListVisibility();
     }
 
+    private ArrayList<ToDoItem> loadTodos() {
+        ArrayList<ToDoItem> loadedTodos = new ArrayList<>();
+        SharedPreferences prefs = getSharedPreferences("TodoPrefs", MODE_PRIVATE);
+        int todoCount = prefs.getInt("todoCount", 0);
+
+        for (int i = 0; i < todoCount; i++) {
+            String name = prefs.getString("todo_name_" + i, "");
+            String className = prefs.getString("todo_class_" + i, "");
+            String dueDate = prefs.getString("todo_date_" + i, "");
+            loadedTodos.add(new ToDoItem(name, className, dueDate));
+        }
+        return loadedTodos;
+    }
+
+    private void saveTodos() {
+        SharedPreferences prefs = getSharedPreferences("TodoPrefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.clear();
+        editor.putInt("todoCount", todos.size());
+
+        for (int i = 0; i < todos.size(); i++) {
+            ToDoItem todo = todos.get(i);
+            editor.putString("todo_name_" + i, todo.getName());
+            editor.putString("todo_class_" + i, todo.getClassName());
+            editor.putString("todo_date_" + i, todo.getDueDate());
+        }
+        editor.apply();
+    }
 
     private void showAddTodoPopup() {
-        // Inflate the popup view
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View popupView = LayoutInflater.from(this).inflate(R.layout.add_todo, null);
+        View popupView = LayoutInflater.from(this).inflate(R.layout.add_todo, todoList, false);
         builder.setView(popupView);
 
-        // Initialize popup fields
         EditText etTodoName = popupView.findViewById(R.id.etTodoName);
         EditText etTodoClass = popupView.findViewById(R.id.etTodoClass);
         EditText etTodoDueDate = popupView.findViewById(R.id.etTodoDueDate);
@@ -58,7 +84,6 @@ public class TodoActivity extends AppCompatActivity {
 
         AlertDialog dialog = builder.create();
 
-        // Add To-Do button functionality
         btnAddTodo.setOnClickListener(v -> {
             String name = etTodoName.getText().toString().trim();
             String className = etTodoClass.getText().toString().trim();
@@ -75,37 +100,34 @@ public class TodoActivity extends AppCompatActivity {
         dialog.show();
     }
 
-
     private void addTodoItem(String name, String className, String dueDate) {
         ToDoItem item = new ToDoItem(name, className, dueDate);
         todos.add(item);
-
-        View todoItemView = createTodoItemView(item);
-        todoList.addView(todoItemView);
-
+        todoList.addView(createTodoItemView(item));
         updateTodoListVisibility();
+        saveTodos();
     }
 
-
     private View createTodoItemView(ToDoItem item) {
-        View itemView = LayoutInflater.from(this).inflate(R.layout.todo_item, null);
+        View itemView = LayoutInflater.from(this).inflate(R.layout.todo_item, todoList, false);
 
         TextView tvName = itemView.findViewById(R.id.tvName);
         TextView tvDetails = itemView.findViewById(R.id.tvDetails);
         Button btnDelete = itemView.findViewById(R.id.btnDelete);
 
         tvName.setText(item.getName());
+
         String dueDateText = "Due: " + item.getDueDate();
         if (isOverdue(item.getDueDate())) {
             dueDateText += " (Overdue)";
         }
         tvDetails.setText(dueDateText);
 
-        // Delete button functionality
         btnDelete.setOnClickListener(v -> {
             todos.remove(item);
             todoList.removeView(itemView);
             updateTodoListVisibility();
+            saveTodos();
         });
 
         return itemView;
@@ -113,14 +135,15 @@ public class TodoActivity extends AppCompatActivity {
 
     private boolean isOverdue(String dueDate) {
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
             Date due = sdf.parse(dueDate);
-            return due.before(Calendar.getInstance().getTime());
+            Date currentTime = Calendar.getInstance().getTime();
+
+            return due != null && due.before(currentTime);
         } catch (Exception e) {
             return false;
         }
     }
-
 
     private void updateTodoListVisibility() {
         if (todos.isEmpty()) {
@@ -130,7 +153,6 @@ public class TodoActivity extends AppCompatActivity {
             todoList.removeView(tvNoItems);
         }
     }
-
 
     private static class ToDoItem {
         private final String name;
@@ -156,4 +178,3 @@ public class TodoActivity extends AppCompatActivity {
         }
     }
 }
-
