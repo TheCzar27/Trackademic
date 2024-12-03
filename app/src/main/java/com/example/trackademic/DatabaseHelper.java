@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "TrackademicDB";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;  // Changed from 1 to 2
 
     // Table Names
     private static final String TABLE_USERS = "users";
@@ -84,14 +84,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Drop older tables if existed
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROFILES);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
-        db.execSQL("DROP TABLE IF EXISTS " + CREATE_TABLE_CLASSES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLASSES);  // Fixed line
 
         // Create tables again
         onCreate(db);
     }
 
     // Class Table management methods
-    public void addNewClass(ClassInfo newClass){
+    public void addNewClass(ClassInfo newClass) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME, newClass.getName());
@@ -105,37 +105,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.insert(TABLE_CLASSES, null, values);
     }
 
-    public void deleteClass(ClassInfo deleteClass){
+    public void deleteClass(ClassInfo deleteClass) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("DELETE FROM " + TABLE_CLASSES + " WHERE " + COLUMN_NAME + " = '" +
-                deleteClass.getName() +"'");
+        // Use parameterized query to prevent SQL injection and handle special characters
+        String[] whereArgs = {deleteClass.getName()};
+        db.delete(TABLE_CLASSES, COLUMN_NAME + "=?", whereArgs);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     // User Management Methods
     public long addUser(String username, String password) {

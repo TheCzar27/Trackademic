@@ -275,6 +275,7 @@ public class ScheduleActivity extends BaseActivity {
         for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
             int checkDay = ((currentDayOfWeek - 1 + dayOffset) % 7) + 1;
             String checkDayName = getDayOfWeekName(checkDay);
+            boolean foundClassToday = false;
 
             for (ClassInfo cls : classList) {
                 if (cls == null || cls.getDayOfWeek() == null || cls.getStartTime() == null) continue;
@@ -289,31 +290,32 @@ public class ScheduleActivity extends BaseActivity {
                     if (dayOffset == 0) {
                         if (compareTimeStrings(cls.getStartTime(), currentTime) <= 0) continue;
 
-                        if (compareTimeStrings(cls.getStartTime(), earliestTime) < 0) {
+                        if (nextClass == null || compareTimeStrings(cls.getStartTime(), earliestTime) < 0) {
                             nextClass = cls;
                             earliestTime = cls.getStartTime();
                             daysUntilNext = 0;
                             nextDay = classDay;  // Store the specific day
+                            foundClassToday = true;
                         }
                     }
                     // For future days, take the earliest class of that day
-                    else if (dayOffset < daysUntilNext) {
+                    else if (dayOffset < daysUntilNext ||
+                            (dayOffset == daysUntilNext && compareTimeStrings(cls.getStartTime(), earliestTime) < 0)) {
                         nextClass = cls;
                         earliestTime = cls.getStartTime();
                         daysUntilNext = dayOffset;
                         nextDay = classDay;  // Store the specific day
-                        break;
                     }
                 }
-
-                // If we found a class today, no need to check future days
-                if (daysUntilNext == 0) break;
             }
+
+            // If we found a class today, no need to check future days
+            if (foundClassToday) break;
         }
 
         // Store the next day in the class info
         if (nextClass != null) {
-            nextClass = new ClassInfo(
+            return new ClassInfo(
                     nextClass.getName(),
                     nextClass.getDescription(),
                     nextDay,  // Use the specific next day instead of all days
@@ -323,7 +325,7 @@ public class ScheduleActivity extends BaseActivity {
             );
         }
 
-        return nextClass;
+        return null;
     }
 
     private void updateNextClassInfo() {
