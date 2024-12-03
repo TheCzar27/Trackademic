@@ -10,9 +10,10 @@
 
     <androidx.cardview.widget.CardView
         android:layout_width="360dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
         android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
         app:cardElevation="4dp"
         app:cardCornerRadius="8dp"
 
@@ -21,12 +22,8 @@
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"></LinearLayout>
-
+            android:layout_height="wrap_content"
+            >
 
 
             <TableLayout
@@ -35,6 +32,7 @@
                 android:layout_gravity="center"
                 android:paddingTop="15dp"
                 >
+
                 <TableRow
                     android:paddingLeft="15dp"
                     android:paddingRight="15dp">
@@ -42,7 +40,7 @@
                         android:id="@+id/className"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Grade Calc"
+                        android:text="Current Grade"
                         android:textColor="@color/gold"
                         android:textStyle="bold"
                         android:textSize="25dp"
@@ -60,9 +58,8 @@
                         android:layout_span="2"
                         android:paddingRight="5dp"
                         />
-
-
                 </TableRow>
+
                 <TableRow
 
                     android:paddingLeft="15dp"
@@ -74,8 +71,6 @@
                         android:text="Desired Grade"
                         android:textSize="18dp"
                         android:layout_span="2"/>
-
-
                     <EditText
                         android:id="@+id/desiredGrade"
                         android:layout_width="wrap_content"
@@ -85,12 +80,13 @@
                         android:inputType="numberDecimal"
                         android:textSize="20dp"
                         android:imeOptions="actionDone"/>
-
                 </TableRow>
+
                 <TableRow
                     android:background="@color/gold"
                     android:paddingLeft="15dp"
-                    android:paddingRight="15dp">
+                    android:paddingRight="15dp"
+                    >
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -101,7 +97,6 @@
                         android:layout_marginRight="10dp"
                         android:paddingVertical="7dp"
                         android:textStyle="bold"/>
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -119,6 +114,7 @@
                         android:textColor="@color/white"
                         android:textStyle="bold"/>
                 </TableRow>
+
                 <TableRow
                     android:paddingLeft="15dp"
                     android:paddingRight="15dp">
@@ -147,8 +143,8 @@
                         android:textAlignment="center"
                         android:inputType="numberDecimal"
                         android:textSize="16dp"/>
-
                 </TableRow>
+
                 <TableRow
                     android:paddingLeft="15dp"
                     android:paddingRight="15dp">
@@ -178,6 +174,7 @@
                         android:inputType="numberDecimal"
                         android:textSize="16dp"/>
                 </TableRow>
+
                 <TableRow
                     android:paddingLeft="15dp"
                     android:paddingRight="15dp">
@@ -207,6 +204,7 @@
                         android:inputType="numberDecimal"
                         android:textSize="16dp"/>
                 </TableRow>
+
                 <TableRow
                     android:paddingLeft="15dp"
                     android:paddingRight="15dp">
@@ -236,30 +234,75 @@
                         android:inputType="numberDecimal"
                         android:textSize="16dp"/>
                 </TableRow>
+            </TableLayout>
 
-                <TableRow
-                    android:paddingTop="10dp"
-                    android:paddingLeft="15dp"
-                    android:paddingRight="15dp"
-                    android:paddingBottom="15dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_gravity="center"
+                android:layout_margin="20dp"
+                android:background="#f5f5f5"
+                android:paddingBottom="15dp"
+
+                >
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Final Exam"
+                    android:textSize="16dp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:textAlignment="center"
+                    android:background="@color/gold"
+                    android:padding="5dp"
+                    android:layout_span="2"
+                    />
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_gravity="center">
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Final Exam (Needed)"
-                        android:inputType="text"
+                        android:text="Weight (%)"
                         android:textSize="16dp"
                         android:textStyle="bold"
                         android:textColor="#000000"
+                        android:textAlignment="center"
+                        android:layout_gravity="center_vertical"
                         />
                     <EditText
                         android:id="@+id/finalExamWeight"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:ems="2"
+                        android:ems="3"
                         android:textAlignment="center"
                         android:inputType="numberDecimal"
                         android:textSize="16dp"
-                        android:textColor="#000000"/>
+                        android:textColor="#000000"
+                        android:layout_gravity="center"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_gravity="center">
+                    <TextView
+                        android:layout_width="200dp"
+                        android:layout_height="wrap_content"
+                        android:text="Grade Needed on Final to Achieve Desired Grade"
+                        android:textAlignment="center"
+                        android:layout_span="2"
+                        android:textSize="16dp"
+                        android:textStyle="bold"
+                        android:textColor="#000000"
+
+                        />
+
                     <TextView
                         android:id="@+id/finalExamGrade"
                         android:layout_width="wrap_content"
@@ -268,11 +311,18 @@
                         android:textStyle="bold"
                         android:textAlignment="center"
                         android:inputType="numberDecimal"
-                        android:textSize="20dp"
-                        android:textColor="#000000"/>
-                </TableRow>
+                        android:textSize="25dp"
+                        android:textColor="#000000"
+                        android:layout_span="2"
+                        android:layout_gravity="center"
+                        android:paddingHorizontal="15dp"/>
+                </LinearLayout>
 
-            </TableLayout>
+
+
+
+            </LinearLayout>
+
             <Button
                 android:id="@+id/calcBtn"
                 android:layout_width="wrap_content"
