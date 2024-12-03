@@ -1,0 +1,29 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="16dp"
+    android:background="@drawable/add_habit_button">
+
+    <TextView
+        android:id="@+id/HabitName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Habit Name"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/HabitDays"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0 Days"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/DeleteHabit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete" />
+</LinearLayout>
