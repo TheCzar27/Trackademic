@@ -117,11 +117,11 @@ public class TodoActivity extends BaseActivity {
 
         tvName.setText(item.getName());
 
-        String dueDateText = "Due: " + item.getDueDate();
+        String detailsText = "Class: " + item.getClassName() + " | Due: " + item.getDueDate();
         if (isOverdue(item.getDueDate())) {
-            dueDateText += " (Overdue)";
+            detailsText += " (Overdue)";
         }
-        tvDetails.setText(dueDateText);
+        tvDetails.setText(detailsText);
 
         btnDelete.setOnClickListener(v -> {
             todos.remove(item);

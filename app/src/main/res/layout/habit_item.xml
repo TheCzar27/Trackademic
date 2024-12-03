@@ -4,23 +4,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginBottom="8dp"
     app:cardElevation="4dp"
     app:cardCornerRadius="8dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="16dp">
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingVertical="10dp"
-            android:background="@color/gold"
-            android:paddingHorizontal="16dp">
+            android:padding="16dp"
+            android:background="@color/gold">
 
             <TextView
                 android:id="@+id/HabitName"
@@ -47,9 +47,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Delete"
-            android:backgroundTint="#FF4444"
             android:layout_gravity="center"
-            android:layout_marginTop="8dp" />
+            android:backgroundTint="#FF4444"
+            android:layout_margin="8dp" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

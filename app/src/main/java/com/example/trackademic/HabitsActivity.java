@@ -99,6 +99,14 @@ public class HabitsActivity extends BaseActivity {
     private View createHabitView(Habit habit) {
         View habitView = LayoutInflater.from(this).inflate(R.layout.habit_item, null);
 
+        // Set layout parameters with margins
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(0, 0, 0, 32); // 32dp bottom margin
+        habitView.setLayoutParams(params);
+
         TextView tvHabitName = habitView.findViewById(R.id.HabitName);
         TextView tvHabitDays = habitView.findViewById(R.id.HabitDays);
         Button btnDeleteHabit = habitView.findViewById(R.id.DeleteHabit);
